@@ -1,0 +1,55 @@
+/* ========================= */
+/* ARCTIC NEON OVERRIDES */
+/* ========================= */
+
+:root {
+  --accent: #7df9ff;
+  --accent2: #9bffb0;
+
+  --gradient: linear-gradient(135deg, #7df9ff 0%, #9bffb0 100%);
+}
+
+/* HERO GLOW */
+
+.hero {
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+
+  position: absolute;
+
+  width: 700px;
+  height: 700px;
+
+  background: radial-gradient(
+    circle,
+    rgba(125, 249, 255, 0.12) 0%,
+    transparent 70%
+  );
+
+  top: 50%;
+  right: -200px;
+
+  transform: translateY(-50%);
+
+  filter: blur(90px);
+
+  z-index: -1;
+}
+
+/* GRADIENT TEXT */
+
+.hero h1 span {
+  background: var(--gradient);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* HOVER LIGHT */
+
+.member-section:hover {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent);
+}

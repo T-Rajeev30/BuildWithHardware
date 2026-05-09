@@ -1,0 +1,41 @@
+:root {
+  --accent: #ffb347;
+  --accent2: #ff7a18;
+
+  --gradient: linear-gradient(135deg, #ffb347 0%, #ff7a18 100%);
+}
+
+.hero {
+  position: relative;
+}
+
+.hero::after {
+  content: "";
+
+  position: absolute;
+
+  width: 700px;
+  height: 700px;
+
+  background: radial-gradient(
+    circle,
+    rgba(255, 179, 71, 0.14) 0%,
+    transparent 70%
+  );
+
+  top: 50%;
+  right: -200px;
+
+  transform: translateY(-50%);
+
+  filter: blur(90px);
+
+  z-index: -1;
+}
+
+.hero h1 span {
+  background: var(--gradient);
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
