@@ -3,39 +3,879 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BWH Platform</title>
+
+    <title>BuildWithHardware</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #000000;
+        --surface: #0a0a0a;
+        --surface2: #101010;
+
+        --text: #f5f5f5;
+        --muted: #8c8c8c;
+
+        --border: rgba(255, 255, 255, 0.08);
+
+        --accent: #dcff74;
+        --accent2: #5ef2c4;
+
+        --display: "Syne", sans-serif;
+        --mono: "DM Mono", monospace;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
       body {
-        font-family: Arial, Helvetica, sans-serif;
-        background: #f6f8fa;
-        color: #111;
+        background: var(--bg);
+        color: var(--text);
+
+        font-family: var(--mono);
+
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+
+        position: fixed;
+        inset: 0;
+
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+
+        background-size: 64px 64px;
+
+        pointer-events: none;
+
+        z-index: -1;
+      }
+
+      .container {
+        width: min(1200px, 92%);
+        margin: auto;
+      }
+
+      section {
+        padding: 120px 0;
+      }
+
+      /* NAVBAR */
+
+      nav {
+        position: fixed;
+
+        width: 100%;
+
+        top: 0;
+
+        z-index: 999;
+
+        border-bottom: 1px solid var(--border);
+
+        background: rgba(9, 9, 9, 0.85);
+
+        backdrop-filter: blur(14px);
+      }
+
+      .nav-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        padding: 22px 0;
+      }
+
+      .logo {
+        font-family: var(--display);
+
+        font-size: 1.1rem;
+
+        font-weight: 800;
+
+        letter-spacing: -0.03em;
+      }
+
+      .logo span {
+        color: var(--accent);
+      }
+
+      .nav-tag {
+        color: var(--muted);
+
+        font-size: 12px;
+
+        letter-spacing: 0.1em;
+
+        text-transform: uppercase;
+      }
+
+      /* HERO */
+
+      .hero {
+        min-height: 100vh;
+
         display: flex;
         align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
       }
-      .card {
-        background: #fff;
-        padding: 2rem 3rem;
-        border-radius: 8px;
-        box-shadow: 0 6px 18px rgba(17, 17, 17, 0.08);
+
+      .eyebrow {
+        color: var(--accent2);
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.25em;
+
+        font-size: 11px;
+
+        margin-bottom: 25px;
+      }
+
+      .hero h1 {
+        font-family: var(--display);
+
+        font-size: clamp(3rem, 7vw, 6rem);
+
+        line-height: 0.92;
+
+        margin-bottom: 30px;
+
+        letter-spacing: -0.07em;
+      }
+
+      .hero h1 span {
+        color: var(--accent);
+      }
+
+      .hero p {
+        max-width: 760px;
+
+        color: var(--muted);
+
+        line-height: 2;
+
+        font-size: 15px;
+
+        margin-bottom: 60px;
+      }
+
+      .hero-stats {
+        display: flex;
+
+        gap: 60px;
+
+        flex-wrap: wrap;
+
+        border-top: 1px solid var(--border);
+
+        padding-top: 40px;
+      }
+
+      .stat h2 {
+        font-family: var(--display);
+
+        font-size: 2.8rem;
+
+        margin-bottom: 5px;
+      }
+
+      .stat span {
+        color: var(--muted);
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.15em;
+
+        font-size: 11px;
+      }
+
+      /* SECTION HEADER */
+
+      .section-header {
+        margin-bottom: 70px;
+      }
+
+      .section-header span {
+        color: var(--accent2);
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.25em;
+
+        font-size: 11px;
+      }
+
+      .section-header h2 {
+        font-family: var(--display);
+
+        font-size: clamp(2rem, 5vw, 4.5rem);
+
+        margin-top: 20px;
+
+        letter-spacing: -0.05em;
+      }
+
+      /* ABOUT */
+
+      .about-box {
+        border: 1px solid var(--border);
+
+        background: var(--surface);
+
+        padding: 60px;
+
+        border-left: 4px solid var(--accent);
+      }
+
+      .about-box p {
+        color: var(--muted);
+
+        line-height: 2;
+
+        margin-bottom: 25px;
+
+        font-size: 15px;
+      }
+
+      /* TEAM MEMBERS */
+
+      .member-section {
+        min-height: 100vh;
+
+        display: flex;
+        align-items: center;
+
+        border-top: 1px solid var(--border);
+      }
+
+      .member-grid {
+        display: grid;
+
+        grid-template-columns: 280px 1fr;
+
+        gap: 80px;
+
+        width: 100%;
+      }
+
+      .member-left {
+        position: sticky;
+
+        top: 120px;
+
+        align-self: start;
+      }
+
+      .member-index {
+        font-family: var(--display);
+
+        font-size: 5rem;
+
+        line-height: 1;
+
+        color: rgba(255, 255, 255, 0.05);
+
+        margin-bottom: 20px;
+      }
+
+      .member-role {
+        color: var(--accent2);
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.2em;
+
+        font-size: 11px;
+      }
+
+      .member-right h2 {
+        font-family: var(--display);
+
+        font-size: clamp(2.5rem, 6vw, 5rem);
+
+        line-height: 0.92;
+
+        margin-bottom: 30px;
+
+        letter-spacing: -0.06em;
+      }
+
+      .member-bio {
+        max-width: 760px;
+
+        color: var(--muted);
+
+        line-height: 2;
+
+        margin-bottom: 40px;
+
+        font-size: 15px;
+      }
+
+      .member-skills {
+        display: flex;
+
+        gap: 12px;
+
+        flex-wrap: wrap;
+
+        margin-bottom: 50px;
+      }
+
+      .member-skills span {
+        border: 1px solid var(--border);
+
+        padding: 10px 16px;
+
+        color: var(--accent);
+
+        font-size: 11px;
+      }
+
+      .member-projects {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 22px;
+
+        margin-bottom: 45px;
+      }
+
+      .member-project {
+        border-left: 2px solid var(--accent);
+
+        padding-left: 22px;
+
+        font-size: 1.05rem;
+
+        line-height: 1.7;
+      }
+
+      .member-contact {
+        display: inline-block;
+
+        color: var(--accent);
+
+        text-decoration: none;
+
+        border-bottom: 1px solid rgba(220, 255, 116, 0.3);
+
+        padding-bottom: 5px;
+
+        transition: 0.3s;
+      }
+
+      .member-contact:hover {
+        transform: translateX(4px);
+      }
+
+      /* CONTACT */
+
+      .contact-box {
+        border: 1px solid var(--border);
+
+        background: var(--surface);
+
+        padding: 90px;
+
         text-align: center;
       }
-      h1 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1.6rem;
+
+      .contact-grid {
+        display: flex;
+
+        justify-content: center;
+
+        gap: 80px;
+
+        flex-wrap: wrap;
+
+        margin-top: 50px;
       }
-      p {
-        margin: 0;
-        color: #555;
+
+      .contact-item {
+        text-align: left;
+      }
+
+      .contact-label {
+        color: var(--accent2);
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.2em;
+
+        font-size: 11px;
+
+        margin-bottom: 12px;
+      }
+
+      .contact-item a {
+        color: white;
+
+        text-decoration: none;
+
+        font-size: 1.1rem;
+
+        transition: 0.3s;
+      }
+
+      .contact-item a:hover {
+        color: var(--accent);
+      }
+      .contact-box h2 {
+        font-family: var(--display);
+
+        font-size: clamp(2rem, 5vw, 4rem);
+
+        margin-bottom: 25px;
+      }
+
+      .contact-box p {
+        color: var(--muted);
+
+        max-width: 700px;
+
+        margin: auto;
+
+        line-height: 2;
+
+        margin-bottom: 40px;
+      }
+
+      .btn {
+        display: inline-block;
+
+        background: var(--accent);
+
+        color: black;
+
+        padding: 18px 35px;
+
+        text-decoration: none;
+
+        font-weight: bold;
+
+        transition: 0.3s;
+      }
+
+      .btn:hover {
+        transform: translateY(-4px);
+      }
+
+      /* FOOTER */
+
+      footer {
+        border-top: 1px solid var(--border);
+
+        padding: 40px 0;
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        flex-wrap: wrap;
+
+        gap: 20px;
+      }
+
+      .footer-inner p {
+        color: var(--muted);
+
+        font-size: 12px;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 900px) {
+        .member-grid {
+          grid-template-columns: 1fr;
+
+          gap: 40px;
+        }
+
+        .member-left {
+          position: relative;
+
+          top: 0;
+        }
+
+        .member-index {
+          font-size: 5rem;
+        }
+
+        .about-box,
+        .contact-box {
+          padding: 40px;
+        }
       }
     </style>
   </head>
+
   <body>
-    <div class="card">
-      <h1>Welcome to the BWH Platform</h1>
-      <p>Build With Hardware — your project starts here.</p>
-    </div>
+    <!-- NAVBAR -->
+
+    <nav>
+      <div class="container nav-inner">
+        <div class="logo">Build<span>With</span>Hardware</div>
+
+        <div class="nav-tag">Bengaluru · India</div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+
+    <section class="hero">
+      <div class="container">
+        <div class="eyebrow">Hardware-first engineering collective</div>
+
+        <h1>
+          Engineers who<br />
+          <span>build deployable systems.</span>
+        </h1>
+
+        <p>
+          A multidisciplinary team focused on embedded systems, robotics,
+          firmware engineering, IoT infrastructure, control systems and
+          full-stack product development.
+        </p>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+
+    <section>
+      <div class="container">
+        <div class="section-header">
+          <span>About</span>
+
+          <h2>
+            Built by engineers.<br />
+            Driven by deployment.
+          </h2>
+        </div>
+
+        <div class="about-box">
+          <p>
+            BuildWithHardware is a hardware-focused engineering collective
+            working across embedded systems, robotics, edge AI, cloud
+            infrastructure and deployable product systems.
+          </p>
+
+          <p>
+            We focus on real-world execution: firmware architecture, PCB
+            systems, autonomous robotics, telemetry infrastructure, product
+            software and industrial integrations.
+          </p>
+
+          <p>
+            Every system we build is designed with deployment, scalability and
+            engineering depth in mind.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RAJEEV -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">01</div>
+
+          <div class="member-role">Founder · Full-stack & Embedded</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Rajeev Tiwari</h2>
+
+          <p class="member-bio">
+            Embedded systems engineer focused on robotics, firmware, telemetry
+            infrastructure, edge AI and deployable hardware products.
+          </p>
+
+          <div class="member-skills">
+            <span>ESP32</span>
+            <span>STM32</span>
+            <span>ROS2</span>
+            <span>AWS</span>
+            <span>KiCad</span>
+            <span>Next.js</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">Autonomous Drone Platform</div>
+
+            <div class="member-project">STATCAMS Infrastructure</div>
+
+            <div class="member-project">DIY LiDAR Mapping System</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MANAS -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">02</div>
+
+          <div class="member-role">Embedded Systems & Firmware Engineer</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Manas Yadu</h2>
+
+          <p class="member-bio">
+            Embedded systems developer focused on firmware engineering,
+            robotics, Linux-based systems and autonomous drone platforms.
+          </p>
+
+          <div class="member-skills">
+            <span>Embedded C</span>
+            <span>Python</span>
+            <span>STM32</span>
+            <span>ROS2</span>
+            <span>SLAM</span>
+            <span>Verilog</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">Search & Rescue Drone System</div>
+
+            <div class="member-project">Autonomous Robo Vacuum Cleaner</div>
+
+            <div class="member-project">
+              FPGA-Based Traffic Light Controller
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAJAL -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">03</div>
+
+          <div class="member-role">Hardware Design Engineer</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Sajal Raj</h2>
+
+          <p class="member-bio">
+            Passionate Electronics and Telecommunication Engineering student
+            interested in embedded systems, IoT, robotics, CAD designing and
+            graphic designing.
+          </p>
+
+          <div class="member-skills">
+            <span>ESP32</span>
+            <span>OpenCV</span>
+            <span>ROS2</span>
+            <span>Gazebo</span>
+            <span>Fusion 360</span>
+            <span>Computer Vision</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">NIDAR Drone Project</div>
+
+            <div class="member-project">
+              Soil Monitoring & NPK Detection System
+            </div>
+
+            <div class="member-project">e-Yantra Drone Simulation</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SHUBHAM -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">04</div>
+
+          <div class="member-role">Hardware Engineer</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Shubham Kumar</h2>
+
+          <p class="member-bio">
+            Passionate Electronics and Communication Engineering student
+            interested in embedded systems, IoT, robotics, VLSI and physical AI.
+          </p>
+
+          <div class="member-skills">
+            <span>ESP32</span>
+            <span>STM32</span>
+            <span>SystemVerilog</span>
+            <span>ROS2</span>
+            <span>FreeRTOS</span>
+            <span>Computer Vision</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">Cardio Automatic Monitor</div>
+
+            <div class="member-project">
+              ISRO-URSC GNSS Denied Autonomous Drone Project
+            </div>
+
+            <div class="member-project">RISC-V Chip Design</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURAJ -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">05</div>
+
+          <div class="member-role">Hardware Engineer</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Suraj Kumar Verma</h2>
+
+          <p class="member-bio">
+            Hardware-focused engineer working across embedded systems, PCB
+            development, control systems and autonomous robotics.
+          </p>
+
+          <div class="member-skills">
+            <span>ESP32</span>
+            <span>STM32</span>
+            <span>Ardupilot</span>
+            <span>KiCad</span>
+            <span>PLC</span>
+            <span>PCB Design</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">Autonomous Drone for IRoC-U</div>
+
+            <div class="member-project">Custom ESP32 Development Board</div>
+
+            <div class="member-project">Kinematic Airplane Simulation</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ANKUR -->
+
+    <section class="member-section">
+      <div class="container member-grid">
+        <div class="member-left">
+          <div class="member-index">06</div>
+
+          <div class="member-role">Systems Integration Engineer</div>
+        </div>
+
+        <div class="member-right">
+          <h2>Ankur Phatak</h2>
+
+          <p class="member-bio">
+            Focused on integrating software systems, APIs, cloud infrastructure
+            and application layers into cohesive deployable products.
+          </p>
+
+          <div class="member-skills">
+            <span>API Integration</span>
+            <span>System Design</span>
+            <span>Backend Infrastructure</span>
+            <span>Application Architecture</span>
+            <span>Automation</span>
+          </div>
+
+          <div class="member-projects">
+            <div class="member-project">Product Workflow Automation</div>
+
+            <div class="member-project">Backend Systems Architecture</div>
+
+            <div class="member-project">
+              Application Infrastructure Integration
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+
+    <!-- CONTACT -->
+
+    <section>
+      <div class="container">
+        <div class="contact-box">
+          <div class="section-header">
+            <span>Contact</span>
+
+            <h2>Let’s build something real.</h2>
+          </div>
+
+          <p>
+            Available for embedded systems, robotics, IoT infrastructure,
+            firmware engineering and deployable product systems.
+          </p>
+
+          <div class="contact-grid">
+            <div class="contact-item">
+              <div class="contact-label">Email</div>
+
+              <a href="mailto:rajeevtiwari30305@gmail.com">
+                rajeevtiwari30305@gmail.com
+              </a>
+            </div>
+
+            <div class="contact-item">
+              <div class="contact-label">Phone</div>
+
+              <a href="tel:+917224086640"> +91 7224086640 </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="logo">Build<span>With</span>Hardware</div>
+
+        <p>Bengaluru, India · buildwithhardware.in</p>
+      </div>
+    </footer>
   </body>
 </html>
