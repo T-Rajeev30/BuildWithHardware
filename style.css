@@ -511,3 +511,77 @@ footer {
     padding: 40px;
   }
 }
+
+/* ========================= */
+/* SERVICES */
+/* ========================= */
+
+.services-section {
+  border-top: 1px solid var(--border);
+}
+
+.services-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 30px;
+}
+
+.service-card {
+  border: 1px solid var(--border);
+
+  background: var(--surface);
+
+  padding: 45px;
+
+  transition: 0.3s;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+.service-card:hover {
+  transform: translateY(-6px);
+
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.service-index {
+  font-family: var(--display);
+
+  font-size: 4rem;
+
+  line-height: 1;
+
+  color: rgba(255, 255, 255, 0.05);
+
+  margin-bottom: 30px;
+}
+
+.service-card h3 {
+  font-family: var(--display);
+
+  font-size: 2rem;
+
+  margin-bottom: 25px;
+
+  line-height: 1.1;
+}
+
+.service-card p {
+  color: var(--muted);
+
+  line-height: 2;
+
+  font-size: 14px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+}
