@@ -3,506 +3,1607 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>BuildWithHardware</title>
-
+    <title>KAALKRIT — Autonomous Intelligence for the Unknown</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..700&family=JetBrains+Mono:wght@300..600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="style4.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+      :root {
+        --void: #050505;
+        --deep: #0b0f19;
+        --panel: #0e1420;
+        --blue: #3b82f6;
+        --cyan: #22d3ee;
+        --white: #f5f7fa;
+        --steel: #8b95a7;
+        --line: rgba(139, 149, 167, 0.14);
+        --glow: rgba(59, 130, 246, 0.35);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--void);
+        color: var(--white);
+        font-family: "Inter", sans-serif;
+        overflow-x: hidden;
+        cursor: none;
+      }
+      ::selection {
+        background: var(--blue);
+        color: var(--void);
+      }
+      h1,
+      h2,
+      h3,
+      .display {
+        font-family: "Space Grotesk", sans-serif;
+        letter-spacing: -0.02em;
+      }
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+        letter-spacing: 0.05em;
+      }
+
+      /* custom reticle cursor */
+      #reticle {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 26px;
+        height: 26px;
+        border: 1px solid var(--cyan);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.18s ease,
+          height 0.18s ease,
+          border-color 0.18s ease,
+          opacity 0.3s ease;
+        mix-blend-mode: screen;
+      }
+      #reticle::before,
+      #reticle::after {
+        content: "";
+        position: absolute;
+        background: var(--cyan);
+      }
+      #reticle::before {
+        width: 1px;
+        height: 8px;
+        left: 50%;
+        top: -12px;
+        transform: translateX(-50%);
+      }
+      #reticle::after {
+        width: 8px;
+        height: 1px;
+        top: 50%;
+        left: -12px;
+        transform: translateY(-50%);
+      }
+      #reticle.active {
+        width: 46px;
+        height: 46px;
+        border-color: var(--blue);
+      }
+
+      /* grid backdrop */
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(
+          ellipse 80% 60% at 50% 30%,
+          black 40%,
+          transparent 90%
+        );
+      }
+      .noise {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.035;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      /* nav */
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 48px;
+        backdrop-filter: blur(12px);
+        background: linear-gradient(to bottom, rgba(5, 5, 5, 0.7), transparent);
+        border-bottom: 1px solid transparent;
+        transition:
+          border-color 0.4s ease,
+          background 0.4s ease;
+      }
+      nav.scrolled {
+        border-color: var(--line);
+        background: rgba(5, 5, 5, 0.85);
+      }
+      .logo {
+        font-size: 19px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+      }
+      .logo span {
+        color: var(--blue);
+      }
+      .navlinks {
+        display: flex;
+        gap: 40px;
+        font-size: 13px;
+        color: var(--steel);
+      }
+      .navlinks a {
+        color: var(--steel);
+        text-decoration: none;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-size: 11px;
+        transition: color 0.3s;
+        position: relative;
+      }
+      .navlinks a:hover {
+        color: var(--white);
+      }
+      @media (max-width: 900px) {
+        .navlinks {
+          display: none;
+        }
+      }
+
+      .section {
+        position: relative;
+        padding: 160px 48px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      @media (max-width: 700px) {
+        .section {
+          padding: 100px 24px;
+        }
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--cyan);
+        margin-bottom: 24px;
+      }
+      .eyebrow::before {
+        content: "";
+        width: 20px;
+        height: 1px;
+        background: var(--cyan);
+      }
+
+      /* reveal on scroll */
+      .reveal {
+        opacity: 0;
+        transform: translateY(36px);
+        transition:
+          opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .reveal.in {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* ===== HERO ===== */
+      #hero {
+        height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        overflow: hidden;
+      }
+      #hero-canvas {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        opacity: 0.9;
+      }
+      .fog {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: radial-gradient(
+          ellipse 70% 50% at 50% 100%,
+          rgba(59, 130, 246, 0.12),
+          transparent 70%
+        );
+      }
+      .hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        padding: 0 24px;
+      }
+      .hero-content h1 {
+        font-size: clamp(2.6rem, 7vw, 5.6rem);
+        font-weight: 500;
+        line-height: 1.04;
+        background: linear-gradient(180deg, #fff 40%, #aebbd6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .hero-content .sub {
+        margin-top: 26px;
+        font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+        color: var(--steel);
+        max-width: 560px;
+        margin-left: auto;
+        margin-right: auto;
+        font-weight: 300;
+      }
+      .hero-btns {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 48px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        padding: 14px 28px;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        text-decoration: none;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: none;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-primary {
+        background: var(--blue);
+        color: #fff;
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+      }
+      .btn-primary:hover {
+        box-shadow: 0 0 32px 4px rgba(59, 130, 246, 0.55);
+        transform: translateY(-2px);
+      }
+      .btn-ghost {
+        border: 1px solid var(--line);
+        color: var(--white);
+        background: rgba(255, 255, 255, 0.02);
+      }
+      .btn-ghost:hover {
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+
+      .hud-corner {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-color: var(--line);
+        z-index: 2;
+        opacity: 0.6;
+      }
+      .hud-corner.tl {
+        top: 100px;
+        left: 36px;
+        border-top: 1px solid var(--cyan);
+        border-left: 1px solid var(--cyan);
+      }
+      .hud-corner.br {
+        bottom: 36px;
+        right: 36px;
+        border-bottom: 1px solid var(--cyan);
+        border-right: 1px solid var(--cyan);
+      }
+      .telemetry {
+        position: absolute;
+        top: 110px;
+        right: 36px;
+        z-index: 2;
+        text-align: right;
+        font-size: 10px;
+        color: var(--steel);
+        line-height: 1.9;
+      }
+      @media (max-width: 700px) {
+        .telemetry,
+        .hud-corner {
+          display: none;
+        }
+      }
+      .scrolldown {
+        position: absolute;
+        bottom: 36px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        font-size: 10px;
+        color: var(--steel);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .scrolldown .bar {
+        width: 1px;
+        height: 34px;
+        background: linear-gradient(var(--cyan), transparent);
+        animation: dropline 1.8s infinite;
+      }
+      @keyframes dropline {
+        0% {
+          opacity: 0;
+          transform: scaleY(0);
+          transform-origin: top;
+        }
+        50% {
+          opacity: 1;
+          transform: scaleY(1);
+          transform-origin: top;
+        }
+        100% {
+          opacity: 0;
+          transform: scaleY(1);
+          transform-origin: bottom;
+        }
+      }
+
+      /* ===== WHO WE ARE ===== */
+      .who-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 80px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .who-grid {
+          grid-template-columns: 1fr;
+          gap: 40px;
+        }
+      }
+      .who-grid h2 {
+        font-size: clamp(2rem, 4vw, 3.2rem);
+        font-weight: 500;
+        line-height: 1.15;
+      }
+      .who-grid h2 .not {
+        color: var(--steel);
+        text-decoration: line-through;
+        text-decoration-color: rgba(139, 149, 167, 0.4);
+      }
+      .who-grid h2 .accent {
+        color: var(--cyan);
+      }
+      .who-copy p {
+        color: var(--steel);
+        font-size: 1rem;
+        line-height: 1.8;
+        font-weight: 300;
+        margin-bottom: 20px;
+      }
+      .who-copy strong {
+        color: var(--white);
+        font-weight: 500;
+      }
+      .stat-row {
+        display: flex;
+        gap: 48px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+      }
+      .stat {
+        border-left: 2px solid var(--blue);
+        padding-left: 16px;
+      }
+      .stat .num {
+        font-family: "JetBrains Mono";
+        font-size: 2rem;
+        color: var(--white);
+      }
+      .stat .lbl {
+        font-size: 11px;
+        color: var(--steel);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 4px;
+      }
+
+      /* ===== NORTH STAR ROADMAP ===== */
+      .northstar {
+        padding-top: 80px;
+      }
+      .ns-track {
+        position: relative;
+        padding-left: 20px;
+      }
+      .ns-line {
+        position: absolute;
+        left: 20px;
+        top: 10px;
+        bottom: 10px;
+        width: 1px;
+        background: linear-gradient(var(--line), var(--blue), var(--line));
+      }
+      .ns-item {
+        position: relative;
+        padding: 0 0 64px 48px;
+      }
+      .ns-item:last-child {
+        padding-bottom: 0;
+      }
+      .ns-dot {
+        position: absolute;
+        left: -4px;
+        top: 4px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--deep);
+        border: 2px solid var(--steel);
+        transition: all 0.5s ease;
+      }
+      .ns-item.in .ns-dot {
+        border-color: var(--cyan);
+        box-shadow: 0 0 16px 2px var(--glow);
+        background: var(--cyan);
+      }
+      .ns-item h3 {
+        font-size: 1.5rem;
+        font-weight: 500;
+      }
+      .ns-item .tag {
+        font-size: 10px;
+        color: var(--steel);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 6px;
+        display: block;
+      }
+      .ns-item p {
+        color: var(--steel);
+        font-weight: 300;
+        margin-top: 8px;
+        max-width: 520px;
+      }
+      .ns-item.current h3 {
+        color: var(--cyan);
+      }
+
+      /* ===== PROBLEM CARDS ===== */
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        margin-top: 56px;
+      }
+      .p-card {
+        background: var(--deep);
+        padding: 36px 28px;
+        transition: background 0.4s ease;
+      }
+      .p-card:hover {
+        background: var(--panel);
+      }
+      .p-card .icon {
+        width: 34px;
+        height: 34px;
+        margin-bottom: 20px;
+        color: var(--blue);
+      }
+      .p-card h4 {
+        font-size: 1.05rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+      .p-card p {
+        font-size: 0.88rem;
+        color: var(--steel);
+        font-weight: 300;
+        line-height: 1.6;
+      }
+
+      /* ===== SOLUTION PIPELINE ===== */
+      .pipeline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 70px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .pipe-node {
+        flex: 1;
+        min-width: 110px;
+        text-align: center;
+        padding: 22px 10px;
+        border: 1px solid var(--line);
+        position: relative;
+        background: var(--deep);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+      .pipe-node .n {
+        font-family: "JetBrains Mono";
+        font-size: 10px;
+        color: var(--cyan);
+        display: block;
+        margin-bottom: 8px;
+      }
+      .pipe-arrow {
+        color: var(--steel);
+        font-size: 14px;
+      }
+      @media (max-width: 900px) {
+        .pipeline {
+          flex-direction: column;
+        }
+        .pipe-arrow {
+          transform: rotate(90deg);
+        }
+      }
+
+      /* ===== AUTONOMY STACK ===== */
+      .stack-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 56px;
+      }
+      .stack-card {
+        border: 1px solid var(--line);
+        padding: 28px 22px;
+        background: linear-gradient(
+          180deg,
+          rgba(59, 130, 246, 0.03),
+          transparent
+        );
+        transition:
+          border-color 0.4s ease,
+          transform 0.4s ease,
+          box-shadow 0.4s ease;
+        position: relative;
+      }
+      .stack-card:hover {
+        border-color: var(--blue);
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -20px var(--glow);
+      }
+      .stack-card .idx {
+        font-family: "JetBrains Mono";
+        font-size: 10px;
+        color: var(--steel);
+      }
+      .stack-card h4 {
+        margin-top: 14px;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+      .stack-card p {
+        font-size: 0.82rem;
+        color: var(--steel);
+        margin-top: 10px;
+        font-weight: 300;
+        line-height: 1.6;
+      }
+
+      /* ===== RESEARCH ===== */
+      .research-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        margin-top: 56px;
+      }
+      .r-card {
+        padding: 32px;
+        border-radius: 6px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        position: relative;
+        overflow: hidden;
+      }
+      .r-card::before {
+        content: "";
+        position: absolute;
+        top: -40%;
+        right: -40%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, var(--glow), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .r-card:hover::before {
+        opacity: 1;
+      }
+      .r-card h4 {
+        font-size: 1.05rem;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+      }
+      .r-card p {
+        font-size: 0.85rem;
+        color: var(--steel);
+        margin-top: 10px;
+        position: relative;
+        z-index: 1;
+        font-weight: 300;
+      }
+
+      /* ===== TEAM ===== */
+      .division {
+        margin-bottom: 64px;
+      }
+      .division h3 {
+        font-size: 1.3rem;
+        color: var(--cyan);
+        font-weight: 500;
+        margin-bottom: 24px;
+      }
+      .member-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 20px;
+      }
+      .member {
+        border: 1px solid var(--line);
+        padding: 24px 18px;
+        text-align: left;
+      }
+      .member .avatar {
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--steel);
+        border-radius: 50%;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono";
+        font-size: 11px;
+        color: var(--steel);
+      }
+      .member .role {
+        font-size: 11px;
+        color: var(--steel);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 4px;
+      }
+
+      /* ===== ROADMAP TIMELINE ===== */
+      .roadmap-track {
+        display: flex;
+        overflow-x: auto;
+        gap: 0;
+        margin-top: 56px;
+        padding-bottom: 20px;
+      }
+      .rm-stage {
+        min-width: 200px;
+        flex: 1;
+        border-right: 1px solid var(--line);
+        padding: 0 24px 0 0;
+        position: relative;
+      }
+      .rm-stage:last-child {
+        border-right: none;
+      }
+      .rm-stage .status {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 4px 10px;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 16px;
+      }
+      .status.done {
+        background: rgba(34, 211, 238, 0.12);
+        color: var(--cyan);
+      }
+      .status.now {
+        background: rgba(59, 130, 246, 0.18);
+        color: var(--blue);
+        border: 1px solid var(--blue);
+      }
+      .status.next {
+        background: rgba(139, 149, 167, 0.08);
+        color: var(--steel);
+      }
+      .rm-stage h4 {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+      .rm-stage p {
+        font-size: 0.8rem;
+        color: var(--steel);
+        font-weight: 300;
+      }
+
+      /* ===== METRICS ===== */
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        margin-top: 56px;
+      }
+      .metric {
+        background: var(--void);
+        padding: 32px 24px;
+      }
+      .metric .val {
+        font-family: "JetBrains Mono";
+        font-size: 2.2rem;
+        color: var(--white);
+      }
+      .metric .val .unit {
+        font-size: 1rem;
+        color: var(--cyan);
+      }
+      .metric .lbl {
+        font-size: 11px;
+        color: var(--steel);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-top: 8px;
+      }
+
+      /* ===== SPONSORS ===== */
+      .sponsor-cta {
+        text-align: center;
+        padding: 100px 40px;
+        border: 1px solid var(--line);
+        position: relative;
+        background: radial-gradient(
+          ellipse 60% 100% at 50% 0%,
+          rgba(59, 130, 246, 0.08),
+          transparent
+        );
+      }
+      .sponsor-cta h2 {
+        font-size: clamp(1.8rem, 3.6vw, 2.8rem);
+        font-weight: 500;
+        max-width: 760px;
+        margin: 0 auto 20px;
+      }
+      .sponsor-benefits {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 24px;
+        margin: 56px 0;
+        text-align: left;
+      }
+      .benefit {
+        border-top: 1px solid var(--line);
+        padding-top: 16px;
+      }
+      .benefit h5 {
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+      .benefit p {
+        font-size: 0.78rem;
+        color: var(--steel);
+        margin-top: 6px;
+        font-weight: 300;
+      }
+
+      /* ===== CONTACT ===== */
+      #contact {
+        text-align: center;
+      }
+      #contact h2 {
+        font-size: clamp(2rem, 5vw, 3.6rem);
+        font-weight: 500;
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .contact-links {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 56px;
+        flex-wrap: wrap;
+      }
+      .contact-links a {
+        color: var(--steel);
+        text-decoration: none;
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid transparent;
+        padding-bottom: 4px;
+        transition: all 0.3s;
+      }
+      .contact-links a:hover {
+        color: var(--cyan);
+        border-color: var(--cyan);
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        color: var(--steel);
+        font-size: 12px;
+      }
+      footer .flogo {
+        font-family: "Space Grotesk";
+        font-size: 1rem;
+        color: var(--white);
+        letter-spacing: 0.1em;
+      }
+
+      .section-title {
+        font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+        font-weight: 500;
+        max-width: 640px;
+        line-height: 1.2;
+      }
+      .section-desc {
+        color: var(--steel);
+        font-size: 0.98rem;
+        font-weight: 300;
+        max-width: 560px;
+        margin-top: 16px;
+        line-height: 1.7;
+      }
+    </style>
   </head>
-
   <body>
-    <!-- NAVBAR -->
+    <div id="reticle"></div>
+    <div class="noise"></div>
 
-    <nav>
-      <div class="container nav-inner">
-        <div class="logo">Build<span>With</span>Hardware</div>
-
-        <div class="nav-tag">Bengaluru · India</div>
+    <nav id="nav">
+      <div class="logo">KAAL<span>KRIT</span></div>
+      <div class="navlinks">
+        <a href="#who">Vision</a>
+        <a href="#solution">Solution</a>
+        <a href="#stack">Stack</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="#sponsors">Sponsors</a>
+        <a href="#contact">Contact</a>
       </div>
     </nav>
 
     <!-- HERO -->
-
-    <section class="hero">
-      <div class="container">
-        <div class="eyebrow">Hardware-first engineering collective</div>
-
-        <h1>
-          Engineers who<br />
-          <span>build deployable systems.</span>
-        </h1>
-
-        <p>
-          A multidisciplinary team focused on embedded systems, robotics,
-          firmware engineering, IoT infrastructure, control systems and
-          full-stack product development.
+    <section id="hero">
+      <canvas id="hero-canvas"></canvas>
+      <div class="grid-bg"></div>
+      <div class="fog"></div>
+      <div class="hud-corner tl"></div>
+      <div class="hud-corner br"></div>
+      <div class="telemetry mono">
+        LAT 12.9716&deg; N<br />
+        LON 77.5946&deg; E<br />
+        GPS: <span style="color: var(--cyan)">DENIED</span><br />
+        MODE: AUTONOMOUS
+      </div>
+      <div class="hero-content">
+        <div class="eyebrow">Kaalkrit Robotics</div>
+        <h1>Engineering Autonomous<br />Intelligence for the Unknown.</h1>
+        <p class="sub">
+          Building India's indigenous autonomous aerial robotics platform — for
+          the environments where GPS ends and intelligence has to begin.
         </p>
+        <div class="hero-btns">
+          <a href="#who" class="btn btn-primary">Explore Vision</a>
+          <a href="#nidar" class="btn btn-ghost">Mission NIDAR</a>
+          <a href="#media" class="btn btn-ghost">Watch Simulation</a>
+        </div>
+      </div>
+      <div class="scrolldown">
+        <span>Scroll</span>
+        <div class="bar"></div>
       </div>
     </section>
 
-    <!-- ABOUT -->
-
-    <section>
-      <div class="container">
-        <div class="section-header">
-          <span>About</span>
-
-          <h2>
-            Built by engineers.<br />
-            Driven by deployment.
-          </h2>
-        </div>
-
-        <div class="about-box">
+    <!-- WHO WE ARE -->
+    <section class="section" id="who">
+      <div class="eyebrow reveal">Who We Are</div>
+      <div class="who-grid">
+        <h2 class="reveal">
+          <span class="not">Not a college club.</span><br />
+          <span class="not">Not a competition team.</span><br />
+          We are building
+          <span class="accent">India's next autonomous robotics company.</span>
+        </h2>
+        <div class="who-copy reveal">
           <p>
-            BuildWithHardware is a hardware-focused engineering collective
-            working across embedded systems, robotics, edge AI, cloud
-            infrastructure and deployable product systems.
+            <strong>KAALKRIT</strong> exists because the machines meant to save
+            lives still fail exactly where the stakes are highest — indoors,
+            underground, in smoke, in collapse. GPS ends at the doorway. We're
+            building the perception and autonomy stack that begins where GPS
+            does not.
           </p>
-
           <p>
-            We focus on real-world execution: firmware architecture, PCB
-            systems, autonomous robotics, telemetry infrastructure, product
-            software and industrial integrations.
+            Our mission starts in simulation, proves itself in competition, and
+            scales into a research and commercial autonomy platform for
+            GPS-denied robotics — search and rescue, industrial inspection, and
+            defense-adjacent operations.
           </p>
+          <div class="stat-row">
+            <div class="stat">
+              <div class="num">2024</div>
+              <div class="lbl">Founded</div>
+            </div>
+            <div class="stat">
+              <div class="num">05</div>
+              <div class="lbl">Core Disciplines</div>
+            </div>
+            <div class="stat">
+              <div class="num">01</div>
+              <div class="lbl">Mission: NIDAR</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- NORTH STAR -->
+    <section class="section northstar" id="northstar">
+      <div class="eyebrow reveal">Our North Star</div>
+      <h2 class="section-title reveal">One roadmap. Five inflection points.</h2>
+      <div class="ns-track" style="margin-top: 64px">
+        <div class="ns-line"></div>
+        <div class="ns-item reveal current">
+          <span class="tag">Stage 01 — Now</span>
+          <div class="ns-dot"></div>
+          <h3>Simulation</h3>
           <p>
-            Every system we build is designed with deployment, scalability and
-            engineering depth in mind.
+            Validating perception, SLAM, and mission-planning pipelines entirely
+            in simulated GPS-denied environments before a single flight.
+          </p>
+        </div>
+        <div class="ns-item reveal">
+          <span class="tag">Stage 02</span>
+          <div class="ns-dot"></div>
+          <h3>Competition</h3>
+          <p>
+            NIDAR AirMouse — our first public proof that the stack survives
+            contact with a real, unknown environment.
+          </p>
+        </div>
+        <div class="ns-item reveal">
+          <span class="tag">Stage 03</span>
+          <div class="ns-dot"></div>
+          <h3>Research Platform</h3>
+          <p>
+            Opening the autonomy stack to research partners: semantic mapping,
+            neural navigation, edge inference.
+          </p>
+        </div>
+        <div class="ns-item reveal">
+          <span class="tag">Stage 04</span>
+          <div class="ns-dot"></div>
+          <h3>Commercial Robotics</h3>
+          <p>
+            Productizing the platform for search and rescue, inspection, and
+            mapping deployments beyond the lab.
+          </p>
+        </div>
+        <div class="ns-item reveal">
+          <span class="tag">Stage 05</span>
+          <div class="ns-dot"></div>
+          <h3>Autonomous Swarm &rarr; Global Deployment</h3>
+          <p>
+            Multi-agent coordination in GPS-denied environments, deployed
+            wherever the map runs out.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- RAJEEV -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">01</div>
-
-          <div class="member-role">Developer · Full-stack & Embedded</div>
-        </div>
-
-        <div class="member-right">
-          <h2>Rajeev Tiwari</h2>
-
-          <p class="member-bio">
-            Embedded systems engineer focused on robotics, firmware, telemetry
-            infrastructure, edge AI and deployable hardware products.
+    <!-- PROBLEM -->
+    <section class="section" id="problem">
+      <div class="eyebrow reveal">The Problem</div>
+      <h2 class="section-title reveal">
+        Drones are blind exactly where it matters most.
+      </h2>
+      <p class="section-desc reveal">
+        Every second of delay in a search-and-rescue operation compounds.
+        Today's aerial platforms are built for open sky — not for the collapsed
+        structure, the smoke-filled corridor, or the tunnel with no signal.
+      </p>
+      <div class="card-grid reveal">
+        <div class="p-card">
+          <h4>No GPS</h4>
+          <p>
+            Indoor, underground, and disaster environments have no satellite fix
+            — most commercial autonomy stops here.
           </p>
-
-          <div class="member-skills">
-            <span>ESP32</span>
-            <span>STM32</span>
-            <span>ROS2</span>
-            <span>AWS</span>
-            <span>KiCad</span>
-            <span>Next.js</span>
-          </div>
-
-          <div class="member-projects">
-            <div class="member-project">Autonomous Drone Platform</div>
-
-            <div class="member-project">STATCAMS Infrastructure</div>
-
-            <div class="member-project">DIY LiDAR Mapping System</div>
-          </div>
+        </div>
+        <div class="p-card">
+          <h4>Unknown Environment</h4>
+          <p>
+            No prior map exists. The vehicle has to build its understanding of
+            the space in real time.
+          </p>
+        </div>
+        <div class="p-card">
+          <h4>Low Visibility</h4>
+          <p>
+            Smoke, dust, and darkness degrade the vision systems most drones
+            depend on entirely.
+          </p>
+        </div>
+        <div class="p-card">
+          <h4>Delay Costs Lives</h4>
+          <p>
+            In search and rescue, every additional minute of manual
+            reconnaissance reduces survival odds.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- MANAS -->
+    <!-- SOLUTION -->
+    <section class="section" id="solution">
+      <div class="eyebrow reveal">Our Solution</div>
+      <h2 class="section-title reveal">One pipeline, from motor to mission.</h2>
+      <p class="section-desc reveal">
+        A closed-loop autonomy stack that perceives, localizes, maps, plans, and
+        reports — without ever touching a satellite signal.
+      </p>
+      <div class="pipeline reveal">
+        <div class="pipe-node"><span class="n">01</span>Drone</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">02</span>Perception</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">03</span>Localization</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">04</span>Mapping</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">05</span>Mission Planning</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">06</span>Survivor Detection</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">07</span>Ground Station</div>
+      </div>
+    </section>
 
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">02</div>
-
-          <div class="member-role">Embedded Systems & Firmware Engineer</div>
-        </div>
-
-        <div class="member-right">
-          <h2>Manas Yadu</h2>
-
-          <p class="member-bio">
-            Embedded systems developer focused on firmware engineering,
-            robotics, Linux-based systems and autonomous drone platforms.
+    <!-- STACK -->
+    <section class="section" id="stack">
+      <div class="eyebrow reveal">Autonomy Stack</div>
+      <h2 class="section-title reveal">
+        Built on proven open robotics infrastructure.
+      </h2>
+      <div class="stack-grid reveal">
+        <div class="stack-card">
+          <span class="idx">/01</span>
+          <h4>PX4</h4>
+          <p>
+            Flight control firmware governing low-level stability and actuation.
           </p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/02</span>
+          <h4>ROS2</h4>
+          <p>
+            Middleware connecting every node in the autonomy graph in real time.
+          </p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/03</span>
+          <h4>Gazebo</h4>
+          <p>
+            Physics-accurate simulation for validating behavior before flight.
+          </p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/04</span>
+          <h4>SLAM</h4>
+          <p>
+            Simultaneous localization and mapping without any external
+            reference.
+          </p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/05</span>
+          <h4>Navigation</h4>
+          <p>Path planning and obstacle avoidance through unmapped space.</p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/06</span>
+          <h4>Perception</h4>
+          <p>
+            Vision and depth pipelines that read the environment in real time.
+          </p>
+        </div>
+        <div class="stack-card">
+          <span class="idx">/07</span>
+          <h4>Mission Planning</h4>
+          <p>Autonomous task sequencing from takeoff to reported exit.</p>
+        </div>
+      </div>
+    </section>
 
-          <div class="member-skills">
-            <span>Embedded C</span>
-            <span>Python</span>
-            <span>STM32</span>
-            <span>ROS2</span>
-            <span>SLAM</span>
-            <span>Verilog</span>
+    <!-- MISSION PIPELINE -->
+    <section class="section" id="nidar">
+      <div class="eyebrow reveal">Mission Pipeline — NIDAR AirMouse</div>
+      <h2 class="section-title reveal">
+        Takeoff to landing, fully autonomous.
+      </h2>
+      <div class="pipeline reveal">
+        <div class="pipe-node"><span class="n">T+0</span>Takeoff</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+1</span>Explore</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+2</span>Map</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+3</span>Detect</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+4</span>Tag</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+5</span>Exit</div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-node"><span class="n">T+6</span>Land</div>
+      </div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section class="section" id="research">
+      <div class="eyebrow reveal">Our Research</div>
+      <h2 class="section-title reveal">What comes after the competition.</h2>
+      <div class="research-grid reveal">
+        <div class="r-card">
+          <h4>Vision Language Models</h4>
+          <p>Natural-language mission understanding for aerial autonomy.</p>
+        </div>
+        <div class="r-card">
+          <h4>Camera-Only Navigation</h4>
+          <p>
+            Removing dependence on LiDAR for lightweight, low-cost autonomy.
+          </p>
+        </div>
+        <div class="r-card">
+          <h4>Swarm Intelligence</h4>
+          <p>Coordinated multi-agent behavior in shared GPS-denied space.</p>
+        </div>
+        <div class="r-card">
+          <h4>Custom Telemetry</h4>
+          <p>Low-latency, resilient links for degraded-signal environments.</p>
+        </div>
+        <div class="r-card">
+          <h4>Indigenous Flight Controller</h4>
+          <p>Domestically designed hardware for full-stack sovereignty.</p>
+        </div>
+        <div class="r-card">
+          <h4>Semantic Mapping</h4>
+          <p>Maps that understand what a space is, not just its geometry.</p>
+        </div>
+        <div class="r-card">
+          <h4>Edge AI</h4>
+          <p>Onboard inference with no dependency on ground compute.</p>
+        </div>
+        <div class="r-card">
+          <h4>Neural Navigation</h4>
+          <p>Learned policies for navigation in previously unseen terrain.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section class="section" id="team">
+      <div class="eyebrow reveal">The Team</div>
+      <h2 class="section-title reveal">Three divisions, one mission.</h2>
+      <div style="margin-top: 56px">
+        <div class="division reveal">
+          <h3>Autonomy Engineering</h3>
+          <div class="member-grid">
+            <div class="member">
+              <div class="avatar">01</div>
+              <div>Member Name</div>
+              <div class="role">Perception</div>
+            </div>
+            <div class="member">
+              <div class="avatar">02</div>
+              <div>Member Name</div>
+              <div class="role">SLAM &amp; Mapping</div>
+            </div>
+            <div class="member">
+              <div class="avatar">03</div>
+              <div>Member Name</div>
+              <div class="role">Mission Planning</div>
+            </div>
           </div>
-
-          <div class="member-projects">
-            <div class="member-project">Search & Rescue Drone System</div>
-
-            <div class="member-project">Autonomous Robo Vacuum Cleaner</div>
-
-            <div class="member-project">
-              FPGA-Based Traffic Light Controller
+        </div>
+        <div class="division reveal">
+          <h3>Hardware Engineering</h3>
+          <div class="member-grid">
+            <div class="member">
+              <div class="avatar">04</div>
+              <div>Member Name</div>
+              <div class="role">Flight Controller</div>
+            </div>
+            <div class="member">
+              <div class="avatar">05</div>
+              <div>Member Name</div>
+              <div class="role">PCB &amp; Systems</div>
+            </div>
+          </div>
+        </div>
+        <div class="division reveal">
+          <h3>Operations &amp; Growth</h3>
+          <div class="member-grid">
+            <div class="member">
+              <div class="avatar">06</div>
+              <div>Member Name</div>
+              <div class="role">Partnerships</div>
+            </div>
+            <div class="member">
+              <div class="avatar">07</div>
+              <div>Member Name</div>
+              <div class="role">Communications</div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SAJAL -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">03</div>
-
-          <div class="member-role">Hardware Design Engineer</div>
+    <!-- ROADMAP -->
+    <section class="section" id="roadmap">
+      <div class="eyebrow reveal">Roadmap</div>
+      <h2 class="section-title reveal">Where we are. Where we're going.</h2>
+      <div class="roadmap-track reveal">
+        <div class="rm-stage">
+          <span class="status done">Complete</span>
+          <h4>Simulation</h4>
+          <p>Core pipeline validated in Gazebo/Isaac environments.</p>
         </div>
-
-        <div class="member-right">
-          <h2>Sajal Raj</h2>
-
-          <p class="member-bio">
-            Passionate Electronics and Telecommunication Engineering student
-            interested in embedded systems, IoT, robotics, CAD designing and
-            graphic designing.
-          </p>
-
-          <div class="member-skills">
-            <span>ESP32</span>
-            <span>OpenCV</span>
-            <span>ROS2</span>
-            <span>Gazebo</span>
-            <span>Fusion 360</span>
-            <span>Computer Vision</span>
-          </div>
-
-          <div class="member-projects">
-            <div class="member-project">NIDAR Drone Project</div>
-
-            <div class="member-project">
-              Soil Monitoring & NPK Detection System
-            </div>
-
-            <div class="member-project">e-Yantra Drone Simulation</div>
-          </div>
+        <div class="rm-stage">
+          <span class="status now">In Progress</span>
+          <h4>Prototype</h4>
+          <p>Hardware integration and first physical test flights.</p>
+        </div>
+        <div class="rm-stage">
+          <span class="status next">Upcoming</span>
+          <h4>Competition</h4>
+          <p>NIDAR AirMouse public demonstration.</p>
+        </div>
+        <div class="rm-stage">
+          <span class="status next">Upcoming</span>
+          <h4>Funding</h4>
+          <p>Seed round to scale the engineering team.</p>
+        </div>
+        <div class="rm-stage">
+          <span class="status next">Upcoming</span>
+          <h4>Research</h4>
+          <p>Opening the platform to academic and industry partners.</p>
+        </div>
+        <div class="rm-stage">
+          <span class="status next">Upcoming</span>
+          <h4>Product &amp; Company</h4>
+          <p>First commercial deployment of the autonomy platform.</p>
         </div>
       </div>
     </section>
 
-    <!-- SHUBHAM -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">04</div>
-
-          <div class="member-role">Hardware Engineer</div>
+    <!-- METRICS -->
+    <section class="section" id="metrics">
+      <div class="eyebrow reveal">Live Metrics</div>
+      <h2 class="section-title reveal">The mission, in numbers.</h2>
+      <div class="metric-grid reveal">
+        <div class="metric">
+          <div class="val" data-count="72"><span class="unit">%</span></div>
+          <div class="lbl">Simulation Progress</div>
         </div>
-
-        <div class="member-right">
-          <h2>Shubham Kumar</h2>
-
-          <p class="member-bio">
-            Passionate Electronics and Communication Engineering student
-            interested in embedded systems, IoT, robotics, VLSI and physical AI.
-          </p>
-
-          <div class="member-skills">
-            <span>ESP32</span>
-            <span>STM32</span>
-            <span>SystemVerilog</span>
-            <span>ROS2</span>
-            <span>FreeRTOS</span>
-            <span>Computer Vision</span>
-          </div>
-
-          <div class="member-projects">
-            <div class="member-project">Cardio Automatic Monitor</div>
-
-            <div class="member-project">
-              ISRO-URSC GNSS Denied Autonomous Drone Project
-            </div>
-
-            <div class="member-project">RISC-V Chip Design</div>
-          </div>
+        <div class="metric">
+          <div class="val" data-count="03">Stage 03</div>
+          <div class="lbl">Current Milestone</div>
+        </div>
+        <div class="metric">
+          <div class="val" data-count="18">18</div>
+          <div class="lbl">ROS Packages</div>
+        </div>
+        <div class="metric">
+          <div class="val" data-count="7">7</div>
+          <div class="lbl">Core Members</div>
+        </div>
+        <div class="metric">
+          <div class="val" data-count="240">240+</div>
+          <div class="lbl">Git Commits</div>
+        </div>
+        <div class="metric">
+          <div class="val" data-count="41">41<span class="unit">%</span></div>
+          <div class="lbl">Mission Completion</div>
         </div>
       </div>
     </section>
 
-    <!-- SURAJ -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">05</div>
-
-          <div class="member-role">Hardware Engineer</div>
+    <!-- SPONSORS -->
+    <section class="section" id="sponsors">
+      <div class="sponsor-cta reveal">
+        <div class="eyebrow" style="justify-content: center">
+          Partner With Us
         </div>
-
-        <div class="member-right">
-          <h2>Suraj Kumar Verma</h2>
-
-          <p class="member-bio">
-            Hardware-focused engineer working across embedded systems, PCB
-            development, control systems and autonomous robotics.
-          </p>
-
-          <div class="member-skills">
-            <span>ESP32</span>
-            <span>STM32</span>
-            <span>Ardupilot</span>
-            <span>KiCad</span>
-            <span>PLC</span>
-            <span>PCB Design</span>
+        <h2>Join us in building India's future of autonomous robotics.</h2>
+        <div class="sponsor-benefits">
+          <div class="benefit">
+            <h5>Technology Access</h5>
+            <p>Early visibility into an indigenous autonomy stack.</p>
           </div>
-
-          <div class="member-projects">
-            <div class="member-project">Autonomous Drone for IRoC-U</div>
-
-            <div class="member-project">Custom ESP32 Development Board</div>
-
-            <div class="member-project">Kinematic Airplane Simulation</div>
+          <div class="benefit">
+            <h5>Media Reach</h5>
+            <p>Association with a public, high-visibility robotics mission.</p>
           </div>
+          <div class="benefit">
+            <h5>Research Collaboration</h5>
+            <p>Joint work on GPS-denied autonomy and perception.</p>
+          </div>
+          <div class="benefit">
+            <h5>CSR &amp; Innovation</h5>
+            <p>
+              Direct support for search-and-rescue-relevant robotics R&amp;D.
+            </p>
+          </div>
+        </div>
+        <div class="hero-btns">
+          <a href="#contact" class="btn btn-primary">Become a Sponsor</a>
+          <a href="#contact" class="btn btn-ghost">Schedule a Meeting</a>
+          <a href="#" class="btn btn-ghost">Download Deck</a>
         </div>
       </div>
     </section>
 
-    <!-- ANKUR -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">06</div>
-
-          <div class="member-role">App & Systems Integration Engineer</div>
+    <!-- MEDIA -->
+    <section class="section" id="media">
+      <div class="eyebrow reveal">Media</div>
+      <h2 class="section-title reveal">See the stack in motion.</h2>
+      <div class="card-grid reveal">
+        <div class="p-card">
+          <h4>Simulation Demo</h4>
+          <p>Full mission run inside a GPS-denied simulated environment.</p>
         </div>
-
-        <div class="member-right">
-          <h2>Ankur Pathak</h2>
-
-          <p class="member-bio">
-            Focused on integrating software systems, APIs, cloud infrastructure
-            and application layers into cohesive deployable products.
-          </p>
-
-          <div class="member-skills">
-            <span>API Integration</span>
-            <span>System Design</span>
-            <span>Backend Infrastructure</span>
-            <span>Application Architecture</span>
-            <span>Automation</span>
-          </div>
-
-          <div class="member-projects">
-            <div class="member-project">Product Workflow Automation</div>
-
-            <div class="member-project">Backend Systems Architecture</div>
-
-            <div class="member-project">
-              Application Infrastructure Integration
-            </div>
-          </div>
+        <div class="p-card">
+          <h4>Bench Testing</h4>
+          <p>Hardware-in-the-loop validation of the flight controller.</p>
         </div>
-      </div>
-    </section>
-    <!-- RAUNIT -->
-
-    <section class="member-section">
-      <div class="container member-grid">
-        <div class="member-left">
-          <div class="member-index">07</div>
-
-          <div class="member-role">Edge AI Developer</div>
-        </div>
-
-        <div class="member-right">
-          <h2>Raunit Singh</h2>
-
-          <p class="member-bio">
-            Edge AI developer focused on machine learning, autonomous inference
-            systems and intelligent automation workflows.
-          </p>
-
-          <div class="member-skills">
-            <span>Machine Learning</span>
-            <span>Edge AI</span>
-            <span>Computer Vision</span>
-            <span>Python</span>
-            <span>PyTorch</span>
-            <span>TensorFlow</span>
-            <span>LLMs</span>
-            <span>Agentic Orchestration</span>
-            <span>AI Automation</span>
-            <span>Inference Pipelines</span>
-            <span>Linux</span>
-            <span>API Integration</span>
-          </div>
-
-          <div class="member-projects">
-            <div class="member-project">Agentic Workflow Automation System</div>
-
-            <div class="member-project">
-              Real-time Computer Vision Infrastructure
-            </div>
-
-            <div class="member-project">Autonomous AI Task Orchestration</div>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- SERVICES -->
-
-    <section class="services-section">
-      <div class="container">
-        <div class="section-header">
-          <span>Services</span>
-
-          <h2>
-            Systems we design,<br />
-            build & deploy.
-          </h2>
-        </div>
-
-        <div class="services-grid">
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">01</div>
-
-            <h3>Embedded Systems</h3>
-
-            <p>
-              Firmware development, custom electronics, STM32/ESP32 systems, PCB
-              design, communication protocols and real-time architectures.
-            </p>
-          </div>
-
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">02</div>
-
-            <h3>Robotics & Autonomous Systems</h3>
-
-            <p>
-              Autonomous drones, robotic platforms, SLAM systems, navigation
-              pipelines, sensor fusion and intelligent control systems.
-            </p>
-          </div>
-
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">03</div>
-
-            <h3>IoT Infrastructure</h3>
-
-            <p>
-              End-to-end telemetry pipelines, MQTT infrastructure,
-              cloud-connected devices, remote monitoring and industrial IoT
-              systems.
-            </p>
-          </div>
-
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">04</div>
-
-            <h3>Edge AI & Computer Vision</h3>
-
-            <p>
-              Real-time inference systems, edge AI deployment, intelligent
-              automation, computer vision pipelines and AI orchestration
-              systems.
-            </p>
-          </div>
-
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">05</div>
-
-            <h3>Hardware Design & Prototyping</h3>
-
-            <p>
-              CAD modeling, PCB prototyping, product design workflows, rapid
-              hardware iteration and manufacturing-ready systems.
-            </p>
-          </div>
-
-          <!-- SERVICE -->
-
-          <div class="service-card">
-            <div class="service-index">06</div>
-
-            <h3>Full-stack Product Development</h3>
-
-            <p>
-              APIs, backend systems, dashboards, cloud infrastructure, product
-              architecture and deployable software systems.
-            </p>
-          </div>
+        <div class="p-card">
+          <h4>CAD &amp; Renderings</h4>
+          <p>Airframe and payload design walkthroughs.</p>
         </div>
       </div>
     </section>
 
     <!-- CONTACT -->
-
-    <!-- CONTACT -->
-
-    <section>
-      <div class="container">
-        <div class="contact-box">
-          <div class="section-header">
-            <span>Contact</span>
-
-            <h2>Let’s build something real.</h2>
-          </div>
-
-          <p>
-            Available for embedded systems, robotics, IoT infrastructure,
-            firmware engineering and deployable product systems.
-          </p>
-
-          <div class="contact-grid">
-            <div class="contact-item">
-              <div class="contact-label">Email</div>
-
-              <a href="mailto:rajeevtiwari30305@gmail.com">
-                rajeevtiwari30305@gmail.com
-              </a>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-label">Phone</div>
-
-              <a href="tel:+917224086640"> +91 7224086640 </a>
-            </div>
-          </div>
-        </div>
+    <section class="section" id="contact">
+      <div class="eyebrow reveal" style="justify-content: center">Contact</div>
+      <h2 class="reveal">Let's talk about what comes next.</h2>
+      <div class="contact-links reveal">
+        <a href="mailto:hello@kaalkrit.com">hello@kaalkrit.com</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">GitHub</a>
+        <a href="#">Bengaluru, India</a>
       </div>
     </section>
-
-    <!-- FOOTER -->
 
     <footer>
-      <div class="container footer-inner">
-        <div class="logo">Build<span>With</span>Hardware</div>
-
-        <p>Bengaluru, India · buildwithhardware.in</p>
-      </div>
+      <div class="flogo">KAALKRIT</div>
+      <div>Engineering the Future of Autonomous Robotics.</div>
     </footer>
+
+    <script>
+      // custom reticle cursor
+      const reticle = document.getElementById("reticle");
+      window.addEventListener("mousemove", (e) => {
+        reticle.style.left = e.clientX + "px";
+        reticle.style.top = e.clientY + "px";
+      });
+      document.querySelectorAll("a,button").forEach((el) => {
+        el.addEventListener("mouseenter", () =>
+          reticle.classList.add("active"),
+        );
+        el.addEventListener("mouseleave", () =>
+          reticle.classList.remove("active"),
+        );
+      });
+
+      // nav scroll state
+      const nav = document.getElementById("nav");
+      window.addEventListener("scroll", () => {
+        nav.classList.toggle("scrolled", window.scrollY > 40);
+      });
+
+      // reveal on scroll
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("in");
+          });
+        },
+        { threshold: 0.15 },
+      );
+      document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+      // north star dots activate individually with stagger already handled by reveal; also mark 'in' class for dot glow
+      document.querySelectorAll(".ns-item").forEach((el) => io.observe(el));
+
+      // animated counters
+      const counters = document.querySelectorAll(".val[data-count]");
+      const cIO = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              const el = e.target;
+              const target = parseInt(el.getAttribute("data-count"));
+              if (isNaN(target)) return;
+              let cur = 0;
+              const suffix = el.querySelector(".unit")
+                ? el.querySelector(".unit").outerHTML
+                : "";
+              const isStage = el.textContent.includes("Stage");
+              if (isStage) return; // skip non-numeric label
+              const step = Math.ceil(target / 40);
+              const timer = setInterval(() => {
+                cur += step;
+                if (cur >= target) {
+                  cur = target;
+                  clearInterval(timer);
+                }
+                el.innerHTML = cur + suffix;
+              }, 30);
+              cIO.unobserve(el);
+            }
+          });
+        },
+        { threshold: 0.5 },
+      );
+      counters.forEach((c) => cIO.observe(c));
+
+      // ===== THREE.JS HERO DRONE WIREFRAME =====
+      (function () {
+        const canvas = document.getElementById("hero-canvas");
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          alpha: true,
+          antialias: true,
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+          45,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100,
+        );
+        camera.position.set(0, 0.4, 7);
+
+        function resize() {
+          const w = window.innerWidth,
+            h = window.innerHeight;
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        resize();
+        window.addEventListener("resize", resize);
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        const blueMat = new THREE.LineBasicMaterial({
+          color: 0x3b82f6,
+          transparent: true,
+          opacity: 0.85,
+        });
+        const cyanMat = new THREE.LineBasicMaterial({
+          color: 0x22d3ee,
+          transparent: true,
+          opacity: 0.5,
+        });
+
+        // central body
+        const bodyGeo = new THREE.IcosahedronGeometry(0.5, 0);
+        const bodyWire = new THREE.WireframeGeometry(bodyGeo);
+        group.add(new THREE.LineSegments(bodyWire, blueMat));
+
+        // arms + rotor rings
+        const armLen = 1.6;
+        const armPositions = [
+          [1, 0, 1],
+          [1, 0, -1],
+          [-1, 0, 1],
+          [-1, 0, -1],
+        ];
+        armPositions.forEach((dir) => {
+          const norm = new THREE.Vector3(dir[0], dir[1], dir[2])
+            .normalize()
+            .multiplyScalar(armLen);
+          const points = [new THREE.Vector3(0, 0, 0), norm];
+          const armGeo = new THREE.BufferGeometry().setFromPoints(points);
+          group.add(new THREE.Line(armGeo, cyanMat));
+
+          const ringGeo = new THREE.TorusGeometry(0.35, 0.01, 8, 40);
+          const ring = new THREE.LineSegments(
+            new THREE.WireframeGeometry(ringGeo),
+            blueMat,
+          );
+          ring.position.copy(norm);
+          ring.rotation.x = Math.PI / 2;
+          group.add(ring);
+        });
+
+        // outer scan sphere
+        const scanGeo = new THREE.SphereGeometry(2.6, 12, 8);
+        const scanWire = new THREE.WireframeGeometry(scanGeo);
+        const scanMesh = new THREE.LineSegments(
+          scanWire,
+          new THREE.LineBasicMaterial({
+            color: 0x3b82f6,
+            transparent: true,
+            opacity: 0.06,
+          }),
+        );
+        scene.add(scanMesh);
+
+        let mouseX = 0,
+          mouseY = 0;
+        window.addEventListener("mousemove", (e) => {
+          mouseX = e.clientX / window.innerWidth - 0.5;
+          mouseY = e.clientY / window.innerHeight - 0.5;
+        });
+
+        let scrollFactor = 0;
+        window.addEventListener("scroll", () => {
+          scrollFactor = Math.min(window.scrollY / window.innerHeight, 1);
+        });
+
+        function animate() {
+          requestAnimationFrame(animate);
+          group.rotation.y += 0.0022;
+          group.rotation.x =
+            mouseY * 0.3 + Math.sin(Date.now() * 0.0004) * 0.03;
+          group.rotation.z = mouseX * 0.15;
+          scanMesh.rotation.y -= 0.0006;
+          group.position.y = -scrollFactor * 1.2;
+          group.position.z = -scrollFactor * 2;
+          renderer.render(scene, camera);
+        }
+        animate();
+      })();
+    </script>
   </body>
 </html>
